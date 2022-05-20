@@ -43,7 +43,7 @@ video.addEventListener('play', () => {
 
       let isMouthOpen = checkMouthOpen(detections[0].landmarks.getMouth()) ? "Mouth is open" : "Mouth is closed"
       context.fillStyle = "white"
-      context.font = "bold 50px Arial"
+      context.font = "bold 45px Arial"
       context.fillText(isMouthOpen, (canvas.width / 2) - 200, (canvas.height / 4))
     }, 100)
 })
