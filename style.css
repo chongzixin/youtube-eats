@@ -3,9 +3,13 @@ body {
     padding: 0;
     width: 100vw;
     height: 100vh;
-    display: flex;
+    display: block;
     justify-content: center;
     align-items: center;
+}
+
+.webcam_area {
+    display: flex;
 }
 
 canvas {
