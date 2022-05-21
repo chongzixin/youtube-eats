@@ -58,9 +58,6 @@ video.addEventListener('play', () => {
           // stop video
           callPlayer("youtube_frame", "pauseVideo")
       }
-    //   context.fillStyle = "pink"
-    //   context.font = "bold 45px Arial"
-    //   context.fillText(canvasText, (canvas.width / 2) - 200, (canvas.height / 4))
     }, 100)
 })
 

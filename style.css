@@ -8,8 +8,10 @@ body {
     align-items: center;
 }
 
-.webcam_area {
-    display: flex;
+#webcam_area {
+    position: absolute;
+    top: 0px;
+    right: 0px;
 }
 
 canvas {
