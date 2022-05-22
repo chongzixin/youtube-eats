@@ -1,3 +1,7 @@
+// pause video if mouth doesnt open every 10 seconds - change to intended value
+const OPEN_MOUTH_TIMER = 10000
+let countdown = OPEN_MOUTH_TIMER
+
 const video = document.getElementById('webcam_video')
 const label = document.getElementById('label')
 
@@ -8,58 +12,34 @@ Promise.all([
     faceapi.nets.faceExpressionNet.loadFromUri('./models')
 ]).then(startWebcam)
 
-function startWebcam() { 
-    navigator.mediaDevices.getUserMedia(
-        { video: {} })
-        .then(stream => { 
-            video.srcObject = stream 
-        })
-        .catch( err => { 
-            console.log('Failed to get local stream' ,err); 
-        }
-    )
-}
-
 startWebcam();
 callPlayer("youtube_frame", function() {
     // This function runs once the player is ready ("onYouTubePlayerReady")
     callPlayer("youtube_frame", "playVideo");
+    console.log('player is ready')
 });
 
 video.addEventListener('play', () => {
-    //create the canvas from video element as we have created above
-    const canvas = faceapi.createCanvasFromMedia(video);
-    //append canvas to body or the dom element where you want to append it
-    document.body.append(canvas)
-    // displaySize will help us to match the dimension with video screen and accordingly it will draw our detections
-    // on the streaming video screen
-    const displaySize = { width: video.width, height: video.height }
-    faceapi.matchDimensions(canvas, displaySize)
     setInterval(async () => {
       const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
-    //   const resizedDetections = faceapi.resizeResults(detections, displaySize)
-    //   const context = canvas.getContext("2d")
-    //   context.clearRect(0, 0, canvas.width, canvas.height)
-    //   faceapi.draw.drawDetections(canvas, resizedDetections)
-    //   faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-    //   faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-
-      let isMouthOpen = checkMouthOpen(detections[0].landmarks.getMouth())
-      let canvasText
+      const isMouthOpen = checkMouthOpen(detections[0].landmarks.getMouth())
 
       if(isMouthOpen) {
-          canvasText = "Mouth is open"
           label.innerHTML = "Mouth is open"
-          // play video
-          callPlayer("youtube_frame", "playVideo")
+          // play video then restart timer to intended value
+          playVideo()
+          countdown = OPEN_MOUTH_TIMER
       } else {
-          canvasText = "Mouth is closed"
           label.innerHTML = "Mouth is closed"
-          // stop video
-          callPlayer("youtube_frame", "pauseVideo")
+          countdown -= 100
       }
+
+      // pause video if mouth hasn't opened for awhile
+      if(countdown < 0) pauseVideo()
     }, 100)
 })
+
+/* WEBCAM AND DETECTION LOGIC */
 
 function getLipHeight(lip, isUpper) {
     const indexArray = isUpper ? [[10,19], [9,18], [8,17]] : [[2,13], [3,14], [4,15]]
@@ -87,16 +67,41 @@ function checkMouthOpen(lip) {
     topLipHeight = getLipHeight(lip, true)
     bottomLipHeight = getLipHeight(lip, false)
     mouthHeight = getMouthHeight(lip)
-    // console.log("topLipHeight: " + topLipHeight)
-    // console.log("bottomLipHeight: " + bottomLipHeight)
-    // console.log("mouthHeight: " + mouthHeight)
 
     // if mouth is open more than lip height * ratio, return true
     ratio = 0.5
     return (mouthHeight > Math.min(topLipHeight, bottomLipHeight) * ratio) ? true : false
 }
 
+function startWebcam() { 
+    navigator.mediaDevices.getUserMedia(
+        { video: {} })
+        .then(stream => { 
+            video.srcObject = stream 
+        })
+        .catch( err => { 
+            console.log('Failed to get local stream' ,err); 
+        }
+    )
+}
+
 /* VIDEO RELATED FUNCTIONS */
+
+function changeVideo() {
+    const youtubeVideo = document.getElementById("youtube_video")
+    const textboxURL = document.getElementById("youtube_url").value
+    // convert the youtube url to embed url
+    const newURL = "https://www.youtube.com/embed/" + textboxURL.slice(textboxURL.lastIndexOf('/') + 1) + "?enablejsapi=1"
+    youtubeVideo.src = newURL
+}
+
+function playVideo() {
+    callPlayer("youtube_frame", "playVideo")
+}
+
+function pauseVideo() {
+    callPlayer("youtube_frame", "pauseVideo")
+}
 
 function callPlayer(frame_id, func, args) {
     if (window.jQuery && frame_id instanceof jQuery) frame_id = frame_id.get(0).id;
@@ -176,13 +181,4 @@ function callPlayer(frame_id, func, args) {
         :
             (add ? window.attachEvent : window.detachEvent)('onmessage', listener);
     }
-}
-
-function changeVideo() {
-    const youtubeVideo = document.getElementById("youtube_video")
-    const textboxURL = document.getElementById("youtube_url").value
-    const newURL = "https://www.youtube.com/embed/" + textboxURL.slice(textboxURL.lastIndexOf('/') + 1) + "?enablejsapi=1"
-    // convert the youtube url to embed url
-    console.log(newURL)
-    youtubeVideo.src = newURL
 }
