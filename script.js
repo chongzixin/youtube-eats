@@ -1,3 +1,6 @@
+// TODO: improve face detection for mobile devices. also check for brightness
+// TODO: styling
+
 // pause video if mouth doesnt open every 10 seconds - change to intended value
 const OPEN_MOUTH_TIMER = 10000
 let countdown = OPEN_MOUTH_TIMER
@@ -85,7 +88,7 @@ function startWebcam() {
     )
 }
 
-/* VIDEO RELATED FUNCTIONS */
+/* YOUTUBE VIDEO RELATED FUNCTIONS */
 
 function changeVideo() {
     const youtubeVideo = document.getElementById("youtube_video")
@@ -103,6 +106,7 @@ function pauseVideo() {
     callPlayer("youtube_frame", "pauseVideo")
 }
 
+// helper function provided by https://stackoverflow.com/a/7513356/1258600
 function callPlayer(frame_id, func, args) {
     if (window.jQuery && frame_id instanceof jQuery) frame_id = frame_id.get(0).id;
     var iframe = document.getElementById(frame_id);
