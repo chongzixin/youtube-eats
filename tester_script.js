@@ -39,14 +39,8 @@ video.addEventListener('play', () => {
       faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
       faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
 
-      let isMouthOpen = checkMouthOpen(detections[0].landmarks.getMouth())
-      let canvasText
-
-      if(isMouthOpen) {
-          canvasText = "Mouth is open"
-      } else {
-          canvasText = "Mouth is closed"
-      }
+      const isMouthOpen = checkMouthOpen(detections[0].landmarks.getMouth())
+      const canvasText = isMouthOpen ? "Mouth is open" : "Mouth is closed"
       context.fillStyle = "pink"
       context.font = "bold 45px Arial"
       context.fillText(canvasText, (canvas.width / 2) - 200, (canvas.height / 4))
